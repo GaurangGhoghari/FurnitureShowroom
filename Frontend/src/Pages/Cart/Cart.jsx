@@ -19,7 +19,7 @@ import { getCart, updateCartItem, removeCartItem } from "../../api/api";
 
 const SERVER_URL = (
   import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.VITE_API_URL ).replace(/\/api\/?$/, "")
+  (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "")
 ).replace(/\/+$/, "");
 
 const getImageUrl = (image) => {
@@ -44,7 +44,7 @@ const getImageUrl = (image) => {
     }
   }
 
-  return `${SERVER_URL}/${image.replace(/^\/+/, "")}`;
+  return `${SERVER_URL}/${(image || "").replace(/^\/+/, "")}`;
 };
 
 const Cart = () => {

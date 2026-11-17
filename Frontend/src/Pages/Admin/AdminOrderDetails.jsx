@@ -13,7 +13,7 @@ import {
 
 const SERVER_URL = (
   import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.VITE_API_URL).replace(/\/api\/?$/, "")
+  (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "")
 ).replace(/\/+$/, "");
 
 const AdminOrderDetails = () => {
@@ -264,7 +264,7 @@ const AdminOrderDetails = () => {
                         src={
                           item.product_image.startsWith("http")
                             ? item.product_image
-                            : `${SERVER_URL}/${item.product_image.replace(/^\/+/, "")}`
+                            : `${SERVER_URL}/${(item.product_image || "").replace(/^\/+/, "")}`
                         }
                         alt={item.product_name}
                         className="h-full w-full object-cover"

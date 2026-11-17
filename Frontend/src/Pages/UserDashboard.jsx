@@ -24,7 +24,7 @@ import { updateUserProfile } from "../api/api";
 
 const SERVER_URL = (
   import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.VITE_API_URL ).replace(/\/api\/?$/, "")
+  (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "")
 ).replace(/\/+$/, "");
 
 const UserDashboard = () => {
@@ -53,7 +53,7 @@ const UserDashboard = () => {
   const profileImageUrl = currentUser?.profile_image
   ? currentUser.profile_image.startsWith("http")
     ? currentUser.profile_image
-    : `${SERVER_URL}/${currentUser.profile_image.replace(/^\/+/, "")}`
+    : `${SERVER_URL}/${currentUser.profile_(image || "").replace(/^\/+/, "")}`
   : "";
 
   // Set current user data

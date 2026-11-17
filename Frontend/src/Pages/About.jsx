@@ -6,7 +6,7 @@ const About = () => {
 
  const SERVER_URL = (
   import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.VITE_API_URL).replace(/\/api\/?$/, "")
+  (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "")
 ).replace(/\/+$/, "");
 
   useEffect(() => {

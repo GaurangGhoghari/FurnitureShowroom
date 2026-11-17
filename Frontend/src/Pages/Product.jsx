@@ -24,7 +24,7 @@ import Pagination from "../component/Pagination";
 
 const SERVER_URL = (
   import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.VITE_API_URL).replace(/\/api\/?$/, "")
+  (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "")
 ).replace(/\/+$/, "");
 
 const PRODUCTS_PER_PAGE = 4;
