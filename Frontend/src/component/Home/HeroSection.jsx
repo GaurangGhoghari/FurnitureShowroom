@@ -2,6 +2,10 @@
 import { Link } from "react-router-dom";
 
 const HeroSection = () => {
+  const SERVER_URL = (
+    import.meta.env.VITE_SERVER_URL || "http://localhost:3000"
+  ).replace(/\/+$/, "");
+
   return (
     <section className="hero-section overflow-hidden bg-[#FDFBF7] text-stone-800 font-sans">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-2 lg:gap-16 lg:px-12 lg:py-20">
@@ -39,7 +43,9 @@ const HeroSection = () => {
               className="hero-primary-btn inline-flex items-center justify-center gap-3 rounded-xl bg-amber-800 px-7 py-4 text-base font-medium text-white shadow-md shadow-amber-900/10 transition-all duration-300 hover:-translate-y-1 hover:bg-amber-900 hover:shadow-xl hover:shadow-amber-900/20 focus:outline-none focus:ring-2 focus:ring-amber-800 focus:ring-offset-2 active:scale-[0.99]"
             >
               Explore Furniture
-              <span className="hero-arrow" aria-hidden="true">→</span>
+              <span className="hero-arrow" aria-hidden="true">
+                →
+              </span>
             </Link>
 
             <Link
@@ -89,7 +95,7 @@ const HeroSection = () => {
             <div className="hero-frame absolute -right-3 -top-3 -z-10 h-full w-full rounded-2xl bg-amber-200/40 sm:-right-4 sm:-top-4"></div>
 
             <img
-              src={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/hero.jpeg`}
+              src={`${SERVER_URL}/uploads/hero.jpeg`}
               alt="Elegant modern living room with stylish furniture"
               className="hero-image relative h-320 w-full rounded-2xl border border-stone-200/80 object-cover shadow-xl sm:h-150 lg:h-140"
               loading="eager"
@@ -258,4 +264,5 @@ const HeroSection = () => {
     </section>
   );
 };
+
 export default HeroSection;

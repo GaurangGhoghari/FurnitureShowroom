@@ -1,8 +1,12 @@
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const About = () => {
+  const SERVER_URL = (
+    import.meta.env.VITE_SERVER_URL || "http://localhost:3000"
+  ).replace(/\/+$/, "");
+
   useEffect(() => {
     const elements = document.querySelectorAll(".about-reveal");
 
@@ -28,7 +32,6 @@ const About = () => {
 
   return (
     <div className="about-page min-h-screen bg-[#FDFBF7] text-stone-800 font-sans">
-
       <style>{`
         .about-page {
           animation: aboutPageEnter 0.7s ease both;
@@ -132,23 +135,19 @@ const About = () => {
       {/* Hero Section */}
       <section className="overflow-hidden bg-amber-100/40 border-b border-stone-200/80 px-6 py-20 text-center">
         <div className="max-w-4xl mx-auto space-y-4">
-
           <p className="about-hero-badge inline-block rounded-full bg-amber-100/80 border border-amber-200/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-900">
             About Our Studio
           </p>
 
           <h1 className="about-hero-title text-4xl font-serif font-bold text-stone-900 md:text-6xl tracking-wide leading-tight">
             Furniture That Makes <br />
-            <span className="text-amber-800">
-              Your House a Home
-            </span>
+            <span className="text-amber-800">Your House a Home</span>
           </h1>
 
           <p className="about-hero-description mx-auto max-w-2xl text-base text-stone-600 sm:text-lg leading-relaxed">
-            We bring comfort, quality, and artisan woodworking together
-            to make your living space feel truly extraordinary.
+            We bring comfort, quality, and artisan woodworking together to make
+            your living space feel truly extraordinary.
           </p>
-
         </div>
       </section>
 
@@ -160,7 +159,7 @@ const About = () => {
           <div className="absolute -inset-2 bg-linear-to-tr from-amber-200/40 to-stone-200/40 rounded-3xl blur-md -z-10"></div>
 
           <img
-            src={`${import.meta.env.VITE_API_URL.replace("/api", "")}/uploads/Unit.jpeg`}
+            src={`${SERVER_URL}/uploads/Unit.jpeg`}
             alt="Beautiful modern living room setup"
             className="about-image h-80 w-full rounded-2xl object-cover shadow-xl border border-stone-200/80 md:h-120"
             loading="eager"
@@ -181,18 +180,18 @@ const About = () => {
 
           <p className="leading-relaxed text-stone-600 text-sm sm:text-base">
             Our showroom is dedicated to helping you find handcrafted furniture
-            that perfectly balances your aesthetic tastes, comfort, and everyday functionality.
+            that perfectly balances your aesthetic tastes, comfort, and everyday
+            functionality.
           </p>
 
           <p className="leading-relaxed text-stone-600 text-sm sm:text-base">
-            From elegant wooden sofas and minimalist beds to dining tables
-            and modern storage units, we aim to transform every
-            corner of your living space.
+            From elegant wooden sofas and minimalist beds to dining tables and
+            modern storage units, we aim to transform every corner of your
+            living space.
           </p>
 
           {/* Quick Value Props Grid */}
           <div className="grid grid-cols-2 gap-4 pt-2">
-
             <div className="about-card rounded-xl bg-white border border-stone-200/80 p-5 shadow-xs">
               <h3 className="text-lg font-serif font-bold text-amber-900">
                 Quality Wood
@@ -212,7 +211,6 @@ const About = () => {
                 Ergonomic designs made for modern living.
               </p>
             </div>
-
           </div>
         </div>
       </section>
@@ -220,7 +218,6 @@ const About = () => {
       {/* Why Choose Us Grid */}
       <section className="bg-white border-t border-stone-200/80 px-6 py-16 md:py-20">
         <div className="mx-auto max-w-7xl text-center">
-
           <div className="about-reveal">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-800">
               Our Core Values
@@ -231,7 +228,8 @@ const About = () => {
             </h2>
 
             <p className="mx-auto mb-12 max-w-2xl text-sm sm:text-base text-stone-600 leading-relaxed">
-              We focus on durable materials, thoughtful interior design, and providing an exceptional showroom experience.
+              We focus on durable materials, thoughtful interior design, and
+              providing an exceptional showroom experience.
             </p>
           </div>
 
@@ -249,7 +247,8 @@ const About = () => {
               </h3>
 
               <p className="text-sm leading-relaxed text-stone-600">
-                Timeless wooden pieces tailored for both contemporary and classic living interiors.
+                Timeless wooden pieces tailored for both contemporary and
+                classic living interiors.
               </p>
             </div>
 
@@ -264,7 +263,8 @@ const About = () => {
               </h3>
 
               <p className="text-sm leading-relaxed text-stone-600">
-                We prioritize premium wood finishes, structural integrity, and ergonomic usability.
+                We prioritize premium wood finishes, structural integrity, and
+                ergonomic usability.
               </p>
             </div>
 
@@ -279,10 +279,10 @@ const About = () => {
               </h3>
 
               <p className="text-sm leading-relaxed text-stone-600">
-                Our design advisors guide you step-by-step to choose the ideal pieces for your home.
+                Our design advisors guide you step-by-step to choose the ideal
+                pieces for your home.
               </p>
             </div>
-
           </div>
 
           {/* Bottom Call to Action */}
@@ -294,10 +294,8 @@ const About = () => {
               Explore Furniture Catalog →
             </Link>
           </div>
-
         </div>
       </section>
-
     </div>
   );
 };
