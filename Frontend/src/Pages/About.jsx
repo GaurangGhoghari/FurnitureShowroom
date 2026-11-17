@@ -3,9 +3,11 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const About = () => {
-  const SERVER_URL = (
-    import.meta.env.VITE_SERVER_URL || "http://localhost:3000"
-  ).replace(/\/+$/, "");
+
+ const SERVER_URL = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.VITE_API_URL).replace(/\/api\/?$/, "")
+).replace(/\/+$/, "");
 
   useEffect(() => {
     const elements = document.querySelectorAll(".about-reveal");

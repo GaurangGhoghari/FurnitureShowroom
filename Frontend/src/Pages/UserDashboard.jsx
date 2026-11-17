@@ -22,7 +22,10 @@ import {
 import { useAuth } from "../Context/authcontext";
 import { updateUserProfile } from "../api/api";
 
-const SERVER_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+const SERVER_URL = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.VITE_API_URL ).replace(/\/api\/?$/, "")
+).replace(/\/+$/, "");
 
 const UserDashboard = () => {
   const { logout, currentUser, setCurrentUser } = useAuth();

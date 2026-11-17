@@ -17,7 +17,10 @@ import {
 } from "lucide-react";
 import { getCart, updateCartItem, removeCartItem } from "../../api/api";
 
-const SERVER_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "");
+const SERVER_URL = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.VITE_API_URL ).replace(/\/api\/?$/, "")
+).replace(/\/+$/, "");
 
 const getImageUrl = (image) => {
   if (!image) return "";

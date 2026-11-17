@@ -17,7 +17,10 @@ import { addToCart, getProductById, getProducts } from "../api/api";
 
 import { useAuth } from "../Context/authcontext";
 
-const SERVER_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+const SERVER_URL = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.VITE_API_URL ).replace(/\/api\/?$/, "")
+).replace(/\/+$/, "");
 
 // Convert different image formats into usable URLs
 const getImageUrl = (image) => {

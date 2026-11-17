@@ -2,9 +2,11 @@
 import { Link } from "react-router-dom";
 
 const HeroSection = () => {
-  const SERVER_URL = (
-    import.meta.env.VITE_SERVER_URL || "http://localhost:3000"
-  ).replace(/\/+$/, "");
+
+ const SERVER_URL = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.VITE_API_URL ).replace(/\/api\/?$/, "")
+).replace(/\/+$/, "");
 
   return (
     <section className="hero-section overflow-hidden bg-[#FDFBF7] text-stone-800 font-sans">

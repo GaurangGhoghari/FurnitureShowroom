@@ -14,7 +14,10 @@ import {
 
 import { getAdminUserProfile } from "../../api/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "");
+const API_BASE_URL = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.VITE_API_URL).replace(/\/api\/?$/, "")
+).replace(/\/+$/, "");
 
 const AdminUserProfile = () => {
   const { id } = useParams();

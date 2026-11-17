@@ -22,7 +22,11 @@ import {
 import Favorite from "../component/Favorite";
 import Pagination from "../component/Pagination";
 
-const SERVER_URL = import.meta.env.VITE_API_URL.replace("/api", "");
+const SERVER_URL = (
+  import.meta.env.VITE_SERVER_URL ||
+  (import.meta.env.VITE_API_URL).replace(/\/api\/?$/, "")
+).replace(/\/+$/, "");
+
 const PRODUCTS_PER_PAGE = 4;
 
 // FORMAT PRICE
