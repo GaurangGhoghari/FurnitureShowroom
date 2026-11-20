@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 
@@ -6,6 +7,8 @@ const adminMiddleware = require("../middleware/admin.middleware");
 
 const {
   placeOrder,
+  createDemoPaymentOrder,
+  completeDemoPayment,
   getMyOrders,
   getOrderDetails,
   getOrderTracking,
@@ -14,21 +17,44 @@ const {
   getAdminOrderDetails,
 } = require("../controllers/order.controller");
 
+// ==========================================
 // CUSTOMER ROUTES
-// Place New Order
+// ==========================================
+
+// COD Order
 router.post("/", authMiddleware, placeOrder);
 
-// Get Logged-in User Orders
+// Local Demo Payment
+router.post(
+  "/demo/create",
+  authMiddleware,
+  createDemoPaymentOrder
+);
+
+router.post(
+  "/demo/complete",
+  authMiddleware,
+  completeDemoPayment
+);
+
+// My Orders
 router.get("/my-orders", authMiddleware, getMyOrders);
 
-// Get Order Tracking
-router.get("/:id/tracking", authMiddleware, getOrderTracking);
+// Order Tracking
+router.get(
+  "/:id/tracking",
+  authMiddleware,
+  getOrderTracking
+);
 
-// Get Order Details
+// Order Details
 router.get("/:id", authMiddleware, getOrderDetails);
 
+
+// ==========================================
 // ADMIN ROUTES
-// Get All Orders
+// ==========================================
+
 router.get(
   "/admin/all",
   authMiddleware,
@@ -36,7 +62,6 @@ router.get(
   getAllOrders
 );
 
-// Update Order Status
 router.put(
   "/admin/:id/status",
   authMiddleware,
@@ -44,7 +69,6 @@ router.put(
   updateOrderStatus
 );
 
-// Get Single Order Details (Admin)
 router.get(
   "/admin/:id",
   authMiddleware,

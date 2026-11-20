@@ -1,13 +1,19 @@
+
 const db = require("../db/db");
 const fs = require("fs");
 const path = require("path");
+const cloudinary = require("../config/cloudinary");
 
-const SERVER_URL = process.env.SERVER_URL || "http://localhost:3000";
+const SERVER_URL = (
+  process.env.SERVER_URL || "http://localhost:3000"
+).replace(/\/$/, "");
 
-// Convert uploaded file into image URL
+const UPLOADS_DIRECTORY = path.resolve(__dirname, "../../uploads");
+
+// Get Cloudinary URL from uploaded file
 const getImageUrl = (file) => {
   if (!file) return null;
-  return `${SERVER_URL}/uploads/${file.filename}`;
+  return file.path || null;
 };
 
 // Parse images stored in MySQL
@@ -29,29 +35,58 @@ const getUploadedFiles = (files = {}) => {
   return Object.values(files).flat();
 };
 
-// Delete uploaded files if request fails
-const cleanupUploadedFiles = (files = []) => {
-  files.forEach((file) => {
-    const filePath = path.join(__dirname, "../../uploads", file.filename);
-
-    try {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+// Delete newly uploaded Cloudinary files if request fails
+const cleanupUploadedFiles = async (files = []) => {
+  await Promise.allSettled(
+    files.map(async (file) => {
+      if (file?.filename) {
+        await cloudinary.uploader.destroy(file.filename, {
+          resource_type: "image",
+        });
       }
-    } catch (error) {
-      console.error("Uploaded File Cleanup Error:", error.message);
-    }
-  });
+    })
+  );
 };
 
-// Delete an image from uploads folder
-const removeImageFile = (imageUrl) => {
-  if (!imageUrl) return;
+// Delete an image from Cloudinary or legacy local uploads
+const removeImageFile = async (imageUrl) => {
+  if (!imageUrl || typeof imageUrl !== "string") return;
 
   try {
-    const parsedUrl = new URL(imageUrl, SERVER_URL);
+    const parsedUrl = new URL(imageUrl);
 
-    // Only delete files from our uploads directory
+    // Cloudinary image
+    if (
+      parsedUrl.hostname === "res.cloudinary.com" &&
+      parsedUrl.pathname.includes("/image/upload/")
+    ) {
+      const uploadPath = parsedUrl.pathname.split("/image/upload/")[1];
+
+      if (!uploadPath) return;
+
+      const parts = uploadPath.split("/");
+
+      // Remove Cloudinary version segment, e.g. v123456789
+      if (/^v\d+$/.test(parts[0])) {
+        parts.shift();
+      }
+
+      // Remove file extension
+      const lastIndex = parts.length - 1;
+      parts[lastIndex] = parts[lastIndex].replace(/\.[^.]+$/, "");
+
+      const publicId = parts.join("/");
+
+      if (publicId) {
+        await cloudinary.uploader.destroy(publicId, {
+          resource_type: "image",
+        });
+      }
+
+      return;
+    }
+
+    // Legacy local image: /uploads/filename.jpg
     if (parsedUrl.origin !== new URL(SERVER_URL).origin) return;
     if (!parsedUrl.pathname.startsWith("/uploads/")) return;
 
@@ -59,11 +94,9 @@ const removeImageFile = (imageUrl) => {
 
     if (!filename || filename === "." || filename === "..") return;
 
-    const uploadsDirectory = path.resolve(__dirname, "../../uploads");
-    const imagePath = path.resolve(uploadsDirectory, filename);
+    const imagePath = path.resolve(UPLOADS_DIRECTORY, filename);
 
-    // Prevent deleting files outside uploads folder
-    if (!imagePath.startsWith(uploadsDirectory + path.sep)) return;
+    if (!imagePath.startsWith(UPLOADS_DIRECTORY + path.sep)) return;
 
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
@@ -75,9 +108,72 @@ const removeImageFile = (imageUrl) => {
 
 // CREATE PRODUCT
 const createProduct = async (req, res) => {
+  const uploadedFiles = getUploadedFiles(req.files);
+
   try {
-    const { name, category, description, price, stock, is_featured } =
-      req.body;
+    const {
+      name,
+      category,
+      description,
+      price,
+      stock,
+      is_featured,
+    } = req.body;
+
+    const mainImageFile = req.files?.image?.[0];
+    const additionalFiles = req.files?.images || [];
+
+    if (!mainImageFile) {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        message: "Please upload one main product image",
+      });
+    }
+
+    if (additionalFiles.length < 1) {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        message: "Please upload at least one additional image",
+      });
+    }
+
+    if (additionalFiles.length > 10) {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        message: "Maximum 10 additional images are allowed",
+      });
+    }
+
+    if (!name?.trim() || price === undefined || price === "") {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        message: "Product name and price are required",
+      });
+    }
+
+    const numericPrice = Number(price);
+    const numericStock =
+      stock === undefined || stock === "" ? 0 : Number(stock);
+
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        message: "Please enter a valid price",
+      });
+    }
+
+    if (!Number.isInteger(numericStock) || numericStock < 0) {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(400).json({
+        message: "Stock must be a non-negative whole number",
+      });
+    }
 
     const featuredValue =
       is_featured === true ||
@@ -87,61 +183,16 @@ const createProduct = async (req, res) => {
         ? 1
         : 0;
 
-    const uploadedFiles = getUploadedFiles(req.files);
-    const mainImageFile = req.files?.image?.[0];
-    const additionalFiles = req.files?.images || [];
-
-    if (!mainImageFile) {
-      cleanupUploadedFiles(uploadedFiles);
-
-      return res.status(400).json({
-        message: "Please upload one main product image",
-      });
-    }
-
-    if (additionalFiles.length < 1) {
-      cleanupUploadedFiles(uploadedFiles);
-
-      return res.status(400).json({
-        message: "Please upload at least one additional image",
-      });
-    }
-
-    if (additionalFiles.length > 10) {
-      cleanupUploadedFiles(uploadedFiles);
-
-      return res.status(400).json({
-        message: "Maximum 10 additional images are allowed",
-      });
-    }
-
-    if (!name?.trim() || price === undefined || price === "") {
-      cleanupUploadedFiles(uploadedFiles);
-
-      return res.status(400).json({
-        message: "Product name and price are required",
-      });
-    }
-
-    const numericPrice = Number(price);
-    const numericStock = stock === undefined || stock === "" ? 0 : Number(stock);
-
-    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
-      cleanupUploadedFiles(uploadedFiles);
-      return res.status(400).json({
-        message: "Please enter a valid price",
-      });
-    }
-
-    if (!Number.isInteger(numericStock) || numericStock < 0) {
-      cleanupUploadedFiles(uploadedFiles);
-      return res.status(400).json({
-        message: "Stock must be a non-negative whole number",
-      });
-    }
-
     const image = getImageUrl(mainImageFile);
-    const images = additionalFiles.map((file) => getImageUrl(file));
+    const images = additionalFiles.map(getImageUrl);
+
+    if (!image || images.some((url) => !url)) {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(500).json({
+        message: "Failed to get uploaded image URLs",
+      });
+    }
 
     const sql = `
       INSERT INTO products
@@ -167,7 +218,7 @@ const createProduct = async (req, res) => {
       images,
     });
   } catch (error) {
-    cleanupUploadedFiles(getUploadedFiles(req.files));
+    await cleanupUploadedFiles(uploadedFiles);
 
     console.error("Create Product Error:", error);
 
@@ -177,7 +228,7 @@ const createProduct = async (req, res) => {
   }
 };
 
-// GET ALL ACTIVE PRODUCTS WITH FILTERS + SEARCH + SORT + PAGINATION
+// GET ALL ACTIVE PRODUCTS
 const getAllProducts = async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
@@ -213,8 +264,10 @@ const getAllProducts = async (req, res) => {
     const orderBy = sortOptions[sortBy] || sortOptions.featured;
 
     if (
-      (minPrice !== null && (!Number.isFinite(minPrice) || minPrice < 0)) ||
-      (maxPrice !== null && (!Number.isFinite(maxPrice) || maxPrice < 0))
+      (minPrice !== null &&
+        (!Number.isFinite(minPrice) || minPrice < 0)) ||
+      (maxPrice !== null &&
+        (!Number.isFinite(maxPrice) || maxPrice < 0))
     ) {
       return res.status(400).json({
         message: "Price must be a valid non-negative number",
@@ -269,7 +322,7 @@ const getAllProducts = async (req, res) => {
       `SELECT COUNT(*) AS totalProducts
        FROM products
        ${whereClause}`,
-      queryParams,
+      queryParams
     );
 
     const totalProducts = Number(countResult[0].totalProducts);
@@ -281,7 +334,7 @@ const getAllProducts = async (req, res) => {
        ${whereClause}
        ORDER BY ${orderBy}, id DESC
        LIMIT ? OFFSET ?`,
-      [...queryParams, limit, offset],
+      [...queryParams, limit, offset]
     );
 
     return res.status(200).json({
@@ -303,7 +356,7 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-// ADMIN: GET ALL PRODUCTS WITH SEARCH + CATEGORY + STATUS + PAGINATION
+// ADMIN: GET ALL PRODUCTS
 const getAllProductsAdmin = async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
@@ -362,7 +415,7 @@ const getAllProductsAdmin = async (req, res) => {
       `SELECT COUNT(*) AS totalProducts
        FROM products
        ${whereClause}`,
-      queryParams,
+      queryParams
     );
 
     const totalProducts = Number(countResult[0].totalProducts);
@@ -374,7 +427,7 @@ const getAllProductsAdmin = async (req, res) => {
        ${whereClause}
        ORDER BY ${orderBy}, id ASC
        LIMIT ? OFFSET ?`,
-      [...queryParams, limit, offset],
+      [...queryParams, limit, offset]
     );
 
     return res.status(200).json({
@@ -402,11 +455,17 @@ const updateProduct = async (req, res) => {
 
   try {
     const { id } = req.params;
-    const { name, category, description, price, stock, is_featured } =
-      req.body;
+    const {
+      name,
+      category,
+      description,
+      price,
+      stock,
+      is_featured,
+    } = req.body;
 
     if (!name?.trim() || price === undefined || price === "") {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
 
       return res.status(400).json({
         message: "Product name and price are required",
@@ -414,17 +473,20 @@ const updateProduct = async (req, res) => {
     }
 
     const numericPrice = Number(price);
-    const numericStock = stock === undefined || stock === "" ? 0 : Number(stock);
+    const numericStock =
+      stock === undefined || stock === "" ? 0 : Number(stock);
 
     if (!Number.isFinite(numericPrice) || numericPrice < 0) {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
+
       return res.status(400).json({
         message: "Please enter a valid price",
       });
     }
 
     if (!Number.isInteger(numericStock) || numericStock < 0) {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
+
       return res.status(400).json({
         message: "Stock must be a non-negative whole number",
       });
@@ -438,12 +500,13 @@ const updateProduct = async (req, res) => {
         ? 1
         : 0;
 
-    const [existingProducts] = await db
-      .promise()
-      .query("SELECT image, images FROM products WHERE id = ?", [id]);
+    const [existingProducts] = await db.promise().query(
+      "SELECT image, images FROM products WHERE id = ?",
+      [id]
+    );
 
     if (existingProducts.length === 0) {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
 
       return res.status(404).json({
         message: "Product not found",
@@ -451,7 +514,6 @@ const updateProduct = async (req, res) => {
     }
 
     const existingProduct = existingProducts[0];
-
     const newMainFile = req.files?.image?.[0];
 
     const image = newMainFile
@@ -467,7 +529,7 @@ const updateProduct = async (req, res) => {
         requestedRemovedImages = JSON.parse(req.body.removedImages);
       }
     } catch (error) {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
 
       return res.status(400).json({
         message: "Invalid removed images data",
@@ -475,35 +537,31 @@ const updateProduct = async (req, res) => {
     }
 
     if (!Array.isArray(requestedRemovedImages)) {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
 
       return res.status(400).json({
         message: "Invalid removed images data",
       });
     }
 
-    // Only accept URLs that actually belong to this product
     const validRemovedImages = [
       ...new Set(
         requestedRemovedImages.filter(
-          (url) => typeof url === "string" && oldImages.includes(url),
-        ),
+          (url) => typeof url === "string" && oldImages.includes(url)
+        )
       ),
     ];
 
-    // Keep old images that were not selected for deletion
     const remainingImages = oldImages.filter(
-      (url) => !validRemovedImages.includes(url),
+      (url) => !validRemovedImages.includes(url)
     );
 
-    // Add newly uploaded additional images
     const newAdditionalFiles = req.files?.images || [];
-    const newImages = newAdditionalFiles.map((file) => getImageUrl(file));
-
+    const newImages = newAdditionalFiles.map(getImageUrl);
     const images = [...remainingImages, ...newImages];
 
-    if (!image) {
-      cleanupUploadedFiles(uploadedFiles);
+    if (!image || !image.trim()) {
+      await cleanupUploadedFiles(uploadedFiles);
 
       return res.status(400).json({
         message: "Please upload one main product image",
@@ -511,7 +569,7 @@ const updateProduct = async (req, res) => {
     }
 
     if (images.length < 1) {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
 
       return res.status(400).json({
         message: "Please keep or upload at least one additional image",
@@ -519,10 +577,18 @@ const updateProduct = async (req, res) => {
     }
 
     if (images.length > 10) {
-      cleanupUploadedFiles(uploadedFiles);
+      await cleanupUploadedFiles(uploadedFiles);
 
       return res.status(400).json({
         message: "Maximum 10 additional images are allowed",
+      });
+    }
+
+    if (images.some((url) => !url)) {
+      await cleanupUploadedFiles(uploadedFiles);
+
+      return res.status(500).json({
+        message: "Failed to get uploaded image URLs",
       });
     }
 
@@ -552,15 +618,14 @@ const updateProduct = async (req, res) => {
       id,
     ]);
 
-    // Remove old main image only after successful DB update
+    // Delete replaced/removed images only after successful DB update
     if (newMainFile && existingProduct.image) {
-      removeImageFile(existingProduct.image);
+      await removeImageFile(existingProduct.image);
     }
 
-    // Remove only the additional images selected by the admin
-    validRemovedImages.forEach((imageUrl) => {
-      removeImageFile(imageUrl);
-    });
+    for (const oldImage of validRemovedImages) {
+      await removeImageFile(oldImage);
+    }
 
     return res.status(200).json({
       message: "Product updated successfully",
@@ -568,7 +633,7 @@ const updateProduct = async (req, res) => {
       images,
     });
   } catch (error) {
-    cleanupUploadedFiles(uploadedFiles);
+    await cleanupUploadedFiles(uploadedFiles);
 
     console.error("Update Product Error:", error);
 
@@ -583,9 +648,10 @@ const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [products] = await db
-      .promise()
-      .query("SELECT image, images FROM products WHERE id = ?", [id]);
+    const [products] = await db.promise().query(
+      "SELECT image, images FROM products WHERE id = ?",
+      [id]
+    );
 
     if (products.length === 0) {
       return res.status(404).json({
@@ -595,15 +661,18 @@ const deleteProduct = async (req, res) => {
 
     const product = products[0];
 
-    await db.promise().query("DELETE FROM products WHERE id = ?", [id]);
+    await db.promise().query(
+      "DELETE FROM products WHERE id = ?",
+      [id]
+    );
 
-    removeImageFile(product.image);
+    await removeImageFile(product.image);
 
     const additionalImages = parseImages(product.images);
 
-    additionalImages.forEach((imageUrl) => {
-      removeImageFile(imageUrl);
-    });
+    for (const imageUrl of additionalImages) {
+      await removeImageFile(imageUrl);
+    }
 
     return res.status(200).json({
       message: "Product deleted successfully",
@@ -622,9 +691,10 @@ const toggleProductActive = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [products] = await db
-      .promise()
-      .query("SELECT active FROM products WHERE id = ?", [id]);
+    const [products] = await db.promise().query(
+      "SELECT active FROM products WHERE id = ?",
+      [id]
+    );
 
     if (products.length === 0) {
       return res.status(404).json({
@@ -635,9 +705,10 @@ const toggleProductActive = async (req, res) => {
     const currentActive = Number(products[0].active);
     const newActive = currentActive === 1 ? 0 : 1;
 
-    await db
-      .promise()
-      .query("UPDATE products SET active = ? WHERE id = ?", [newActive, id]);
+    await db.promise().query(
+      "UPDATE products SET active = ? WHERE id = ?",
+      [newActive, id]
+    );
 
     return res.status(200).json({
       message:
@@ -665,7 +736,7 @@ const getProductById = async (req, res) => {
        FROM products
        WHERE id = ? AND active = 1
        LIMIT 1`,
-      [id],
+      [id]
     );
 
     if (products.length === 0) {
@@ -698,7 +769,7 @@ const getFeaturedProducts = async (req, res) => {
        WHERE active = 1
          AND is_featured = 1
        ORDER BY created_at DESC, id DESC
-       LIMIT 12`,
+       LIMIT 12`
     );
 
     return res.status(200).json({

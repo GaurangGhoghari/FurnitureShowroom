@@ -51,10 +51,10 @@ const UserDashboard = () => {
 
   // Current profile image URL
   const profileImageUrl = currentUser?.profile_image
-  ? currentUser.profile_image.startsWith("http")
-    ? currentUser.profile_image
-    : `${SERVER_URL}/${currentUser.profile_(image || "").replace(/^\/+/, "")}`
-  : "";
+    ? currentUser.profile_image.startsWith("http")
+      ? currentUser.profile_image
+      : `${SERVER_URL}/${String(currentUser.profile_image).replace(/^\/+/, "")}`
+    : "";
 
   // Set current user data
   useEffect(() => {

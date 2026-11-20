@@ -1,8 +1,14 @@
 
 const mysql = require("mysql2");
 const dotenv = require("dotenv");
+const fs = require("fs");
+const path = require("path");
 
 dotenv.config();
+
+const ca = fs.readFileSync(
+    path.join(process.cwd(), "certs", "ca.pem")
+);
 
 const db = mysql.createPool({
     host: process.env.DB_HOST,
@@ -11,12 +17,15 @@ const db = mysql.createPool({
     database: process.env.DB_NAME,
     port: Number(process.env.DB_PORT),
 
+    ssl: {
+        ca: ca
+    },
+
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
 });
 
-// Check MySQL connection
 db.getConnection((error, connection) => {
     if (error) {
         console.log("MySQL Connection Failed");
@@ -24,8 +33,7 @@ db.getConnection((error, connection) => {
         return;
     }
 
-    console.log("MySQL Database Connected");
-
+    console.log("Aiven MySQL Database Connected");
     connection.release();
 });
 

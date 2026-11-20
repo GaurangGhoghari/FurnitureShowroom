@@ -25,10 +25,12 @@ import AdminOrders from "./Pages/Admin/AdminOrders";
 import AdminOrderDetails from "./Pages/Admin/AdminOrderDetails";
 import AdminUserProfile from "./Pages/Admin/AdminUserProfile";
 import ScrollToTop from "./component/ScrollToTop";
+import Payment from "./Pages/Payment";
 
 import Header from "./component/Header";
 import Footer from "./component/Footer";
 import AuthRoute from "./component/Authroute";
+
 //  import { Contact } from "lucide-react";
 
 const App = () => {
@@ -242,6 +244,15 @@ const App = () => {
             </AuthRoute>
           }
         />
+
+          <Route
+  path="/payment"
+  element={
+    <AuthRoute type="protected" role="user">
+      <Payment />
+    </AuthRoute>
+  }
+/>
 
         <Route path="/wishlist" element={<Favorites />} />
       </Routes>

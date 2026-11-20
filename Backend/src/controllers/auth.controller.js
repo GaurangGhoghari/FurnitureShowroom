@@ -1,4 +1,3 @@
-
 const db = require("../db/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -143,8 +142,8 @@ const loginUser = async (req, res) => {
 
           res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000,
           });
@@ -224,7 +223,6 @@ const updateUserProfile = (req, res) => {
     });
   }
 
-  // Required fields
   if (
     typeof first_name !== "string" ||
     typeof last_name !== "string" ||
@@ -242,7 +240,6 @@ const updateUserProfile = (req, res) => {
   const lastName = last_name.trim();
   const userEmail = email.trim().toLowerCase();
 
-  // Optional fields
   const phoneNumber = phone_number == null ? "" : String(phone_number).trim();
   const userAddress1 = address1 == null ? "" : String(address1).trim();
   const userAddress2 = address2 == null ? "" : String(address2).trim();
@@ -259,7 +256,7 @@ const updateUserProfile = (req, res) => {
     });
   }
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailPattern.test(userEmail)) {
     return res.status(400).json({
@@ -273,10 +270,8 @@ const updateUserProfile = (req, res) => {
     });
   }
 
-  // New image path, or null to keep existing image
-  const profileImage = req.file
-    ? `/uploads/${req.file.filename}`
-    : null;
+  // Cloudinary secure URL; null keeps the existing profile image
+  const profileImage = req.file ? req.file.path : null;
 
   db.query(
     "SELECT id FROM users WHERE email = ? AND id != ?",
@@ -360,8 +355,8 @@ const updateUserProfile = (req, res) => {
 const logoutUser = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/",
   });
 
