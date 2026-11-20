@@ -1,13 +1,14 @@
-
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const About = () => {
-
- const SERVER_URL = (
-  import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "")
-).replace(/\/+$/, "");
+  const SERVER_URL = (
+    import.meta.env.VITE_SERVER_URL ||
+    (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(
+      /\/api\/?$/,
+      "",
+    )
+  ).replace(/\/+$/, "");
 
   useEffect(() => {
     const elements = document.querySelectorAll(".about-reveal");
@@ -24,7 +25,7 @@ const About = () => {
       {
         threshold: 0.12,
         rootMargin: "0px 0px -40px 0px",
-      }
+      },
     );
 
     elements.forEach((element) => observer.observe(element));
@@ -155,14 +156,13 @@ const About = () => {
 
       {/* About Content Section */}
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-16 md:py-20 md:grid-cols-2">
-
         {/* Left Image Showcase */}
         <div className="about-reveal relative overflow-hidden rounded-3xl">
           <div className="absolute -inset-2 bg-linear-to-tr from-amber-200/40 to-stone-200/40 rounded-3xl blur-md -z-10"></div>
 
           <img
-            src={`${SERVER_URL}/uploads/Unit.jpeg`}
-            alt="Beautiful modern living room setup"
+            src="https://res.cloudinary.com/wohjmtzq/image/upload/v1795152871/Unit.jpg"
+            alt="Furniture showroom"
             className="about-image h-80 w-full rounded-2xl object-cover shadow-xl border border-stone-200/80 md:h-120"
             loading="eager"
           />
@@ -237,7 +237,6 @@ const About = () => {
 
           {/* Features Grid */}
           <div className="grid gap-6 md:grid-cols-3">
-
             {/* Card 1 */}
             <div className="about-reveal about-card rounded-2xl border border-stone-200/80 bg-[#FDFBF7] p-8 text-left">
               <div className="about-icon mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100/70 border border-amber-200/60 text-2xl text-amber-800">

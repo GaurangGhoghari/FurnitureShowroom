@@ -1,20 +1,19 @@
-
 import { Link } from "react-router-dom";
 
 const HeroSection = () => {
-
- const SERVER_URL = (
-  import.meta.env.VITE_SERVER_URL ||
-  (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/api\/?$/, "")
-).replace(/\/+$/, "");
+  const SERVER_URL = (
+    import.meta.env.VITE_SERVER_URL ||
+    (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(
+      /\/api\/?$/,
+      "",
+    )
+  ).replace(/\/+$/, "");
 
   return (
     <section className="hero-section overflow-hidden bg-[#FDFBF7] text-stone-800 font-sans">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-2 lg:gap-16 lg:px-12 lg:py-20">
-
         {/* Left Side: Hero Content */}
         <div className="hero-content order-2 lg:order-1">
-
           {/* Small Badge */}
           <div className="hero-badge mb-6 inline-flex items-center gap-2 rounded-full border border-amber-200/60 bg-amber-100/70 px-4 py-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-amber-600"></span>
@@ -92,13 +91,12 @@ const HeroSection = () => {
         {/* Right Side: Furniture Image */}
         <div className="hero-image-wrapper order-1 lg:order-2">
           <div className="relative mx-auto max-w-xl">
-
             {/* Decorative Background Frame */}
             <div className="hero-frame absolute -right-3 -top-3 -z-10 h-full w-full rounded-2xl bg-amber-200/40 sm:-right-4 sm:-top-4"></div>
 
             <img
-              src={`${SERVER_URL}/uploads/hero.jpeg`}
-              alt="Elegant modern living room with stylish furniture"
+              src="https://res.cloudinary.com/wohjmtzq/image/upload/v1795152955/hero.jpg"
+              alt="Furniture showroom"
               className="hero-image relative h-320 w-full rounded-2xl border border-stone-200/80 object-cover shadow-xl sm:h-150 lg:h-140"
               loading="eager"
             />
