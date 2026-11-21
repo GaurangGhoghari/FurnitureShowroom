@@ -38,8 +38,9 @@ db.getConnection((error, connection) => {
     return;
   }
 
-  console.log("XAMPP MySQL Database Connected");
+  console.log("MySQL Database Connected");
   connection.release();
 });
 
 module.exports = db;
+
