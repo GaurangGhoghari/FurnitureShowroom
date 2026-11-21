@@ -367,9 +367,9 @@ const getAllProductsAdmin = async (req, res) => {
       ? requestedLimit
       : 3;
 
-    const search = (req.query.search || "").trim();
-    const status = req.query.status || "all";
-    const category = (req.query.category || "").trim();
+    const search = String(req.query.search || "").trim();
+    const status = String(req.query.status || "all");
+    const category = String(req.query.category || "").trim();
 
     const sortOptions = {
       name_asc: "name ASC",
@@ -455,6 +455,7 @@ const updateProduct = async (req, res) => {
 
   try {
     const { id } = req.params;
+
     const {
       name,
       category,

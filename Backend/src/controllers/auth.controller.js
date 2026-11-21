@@ -1,6 +1,21 @@
+
 const db = require("../db/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
+// Cookie settings: Vercel HTTPS frontend vs local development
+const getCookieOptions = (req) => {
+  const origin = req.get("origin") || "";
+  const isHttpsFrontend = origin.startsWith("https://");
+
+  return {
+    httpOnly: true,
+    secure: isHttpsFrontend,
+    sameSite: isHttpsFrontend ? "none" : "lax",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+};
 
 // REGISTER USER
 const registerUser = async (req, res) => {
@@ -13,9 +28,19 @@ const registerUser = async (req, res) => {
       });
     }
 
+    const firstName = String(first_name).trim();
+    const lastName = String(last_name).trim();
+    const userEmail = String(email).trim().toLowerCase();
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
+    }
+
     db.query(
       "SELECT id FROM users WHERE email = ?",
-      [email],
+      [userEmail],
       async (error, results) => {
         if (error) {
           console.error("Register database error:", error);
@@ -35,7 +60,7 @@ const registerUser = async (req, res) => {
             `INSERT INTO users
             (first_name, last_name, email, password)
             VALUES (?, ?, ?, ?)`,
-            [first_name, last_name, email, hashedPassword],
+            [firstName, lastName, userEmail, hashedPassword],
             (insertError, result) => {
               if (insertError) {
                 console.error("Insert error:", insertError);
@@ -48,9 +73,9 @@ const registerUser = async (req, res) => {
                 message: "Registration successful. Please login.",
                 user: {
                   id: result.insertId,
-                  first_name,
-                  last_name,
-                  email,
+                  first_name: firstName,
+                  last_name: lastName,
+                  email: userEmail,
                   role: "user",
                 },
               });
@@ -81,12 +106,14 @@ const loginUser = async (req, res) => {
       });
     }
 
+    const userEmail = String(email).trim().toLowerCase();
+
     db.query(
       `SELECT id, first_name, last_name, email, password,
               role, status, profile_image
        FROM users
        WHERE email = ?`,
-      [email],
+      [userEmail],
       async (error, results) => {
         if (error) {
           console.error("Login database error:", error);
@@ -136,19 +163,16 @@ const loginUser = async (req, res) => {
             profile_image: user.profile_image,
           };
 
-          const token = jwt.sign(safeUser, process.env.JWT_SECRET, {
-            expiresIn: "7d",
-          });
+          const token = jwt.sign(
+            safeUser,
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+          );
 
-          res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-          });
+          res.cookie("token", token, getCookieOptions(req));
 
           return res.status(200).json({
+            success: true,
             message: "User login successful",
             user: safeUser,
           });
@@ -164,7 +188,7 @@ const loginUser = async (req, res) => {
   }
 };
 
-// GET CURRENT USER AFTER REFRESH
+// GET CURRENT USER
 const getCurrentUser = (req, res) => {
   const userId = req.user?.id;
 
@@ -239,7 +263,6 @@ const updateUserProfile = (req, res) => {
   const firstName = first_name.trim();
   const lastName = last_name.trim();
   const userEmail = email.trim().toLowerCase();
-
   const phoneNumber = phone_number == null ? "" : String(phone_number).trim();
   const userAddress1 = address1 == null ? "" : String(address1).trim();
   const userAddress2 = address2 == null ? "" : String(address2).trim();
@@ -256,7 +279,7 @@ const updateUserProfile = (req, res) => {
     });
   }
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!emailPattern.test(userEmail)) {
     return res.status(400).json({
@@ -270,7 +293,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     });
   }
 
-  // Cloudinary secure URL; null keeps the existing profile image
+  // Cloudinary URL from upload middleware, if a new image was uploaded
   const profileImage = req.file ? req.file.path : null;
 
   db.query(
@@ -353,12 +376,10 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // LOGOUT USER
 const logoutUser = (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/",
-  });
+  const options = getCookieOptions(req);
+  delete options.maxAge;
+
+  res.clearCookie("token", options);
 
   return res.status(200).json({
     success: true,

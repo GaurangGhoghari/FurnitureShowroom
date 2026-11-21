@@ -6,35 +6,40 @@ const path = require("path");
 
 dotenv.config();
 
-const ca = fs.readFileSync(
-    path.join(process.cwd(), "certs", "ca.pem")
-);
+const useSSL = process.env.DB_SSL === "true";
 
-const db = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: Number(process.env.DB_PORT),
+const dbConfig = {
+  host: process.env.DB_HOST || "127.0.0.1",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "furnitureshowroom",
+  port: Number(process.env.DB_PORT || 3306),
 
-    ssl: {
-        ca: ca
-    },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+};
 
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+if (useSSL) {
+  dbConfig.ssl = {
+    ca: fs.readFileSync(
+      path.join(__dirname, "../../certs/ca.pem"),
+      "utf8"
+    ),
+    rejectUnauthorized: true,
+  };
+}
+
+const db = mysql.createPool(dbConfig);
 
 db.getConnection((error, connection) => {
-    if (error) {
-        console.log("MySQL Connection Failed");
-        console.log(error);
-        return;
-    }
+  if (error) {
+    console.error("MySQL Connection Failed:", error.message);
+    return;
+  }
 
-    console.log("Aiven MySQL Database Connected");
-    connection.release();
+  console.log("XAMPP MySQL Database Connected");
+  connection.release();
 });
 
 module.exports = db;

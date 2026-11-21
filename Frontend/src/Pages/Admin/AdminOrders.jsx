@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllOrders, updateOrderStatus } from "../../api/api";
@@ -97,21 +98,34 @@ const AdminOrders = () => {
     }
   };
 
+  const formatPrice = (amount) =>
+    Number(amount || 0).toLocaleString("en-IN");
+
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString("en-IN", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
   return (
-    <div className="min-h-screen bg-[#FDFBF7] px-4 py-8 font-sans text-stone-800 antialiased sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-7xl space-y-6">
-        {/* Header Section */}
-        <div className="flex flex-col justify-between gap-4 border-b border-stone-200/80 pb-6 sm:flex-row sm:items-center">
-          <div>
+    <div className="min-h-screen overflow-x-hidden bg-[#FDFBF7] px-3 py-5 font-sans text-stone-800 antialiased sm:px-6 sm:py-8 lg:px-10">
+      <div className="mx-auto w-full max-w-7xl space-y-5 sm:space-y-6">
+
+        {/* Header */}
+        <div className="flex flex-col gap-4 border-b border-stone-200/80 pb-5 sm:flex-row sm:items-center sm:justify-between sm:pb-6">
+          <div className="min-w-0">
             <div className="mb-2 flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-amber-800" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-800">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-amber-800" />
+              <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-amber-800 sm:text-[11px] sm:tracking-[0.2em]">
                 CraftStudio Showroom / Console
               </span>
             </div>
-            <h1 className="font-serif text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+
+            <h1 className="font-serif text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl lg:text-4xl">
               Order Management
             </h1>
+
             <p className="mt-1 text-xs text-stone-500 sm:text-sm">
               Review, track, and update client furniture order dispatches.
             </p>
@@ -120,157 +134,308 @@ const AdminOrders = () => {
           <button
             onClick={fetchOrders}
             disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-800 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition hover:bg-amber-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-800 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition hover:bg-amber-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:py-2.5"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            <RefreshCw
+              size={14}
+              className={loading ? "animate-spin" : ""}
+            />
             Refresh
           </button>
         </div>
 
-        {/* Stats Summary Cards */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-3xl border border-stone-200/80 bg-white p-6 shadow-xs">
-            <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+        {/* Statistics */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="min-w-0 rounded-2xl border border-stone-200/80 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-6">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 sm:text-xs">
               Total Showroom Orders
             </p>
-            <h2 className="mt-2 font-serif text-3xl font-bold tracking-tight text-stone-900">
+
+            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
               {orders.length}
             </h2>
           </div>
 
-          <div className="rounded-3xl border border-stone-200/80 bg-white p-6 shadow-xs">
-            <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
+          <div className="min-w-0 rounded-2xl border border-stone-200/80 bg-white p-4 shadow-xs sm:rounded-3xl sm:p-6">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 sm:text-xs">
               Pending Orders
             </p>
-            <h2 className="mt-2 font-serif text-3xl font-bold tracking-tight text-amber-900">
+
+            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-amber-900 sm:text-3xl">
               {orders.filter((order) => order.status === "Pending").length}
             </h2>
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search */}
         <div className="flex items-center gap-3 rounded-2xl border border-stone-200/80 bg-white px-4 py-3 shadow-xs">
-          <Search size={18} className="text-stone-400" />
+          <Search size={18} className="shrink-0 text-stone-400" />
+
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by Order ID, User ID or Status..."
-            className="w-full bg-transparent text-sm text-stone-800 placeholder-stone-400 outline-none"
+            className="min-w-0 w-full bg-transparent text-xs text-stone-800 outline-none placeholder:text-stone-400 sm:text-sm"
           />
+
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="shrink-0 text-xs font-semibold text-amber-800 hover:text-amber-950"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-medium text-rose-800 shadow-2xs">
-            <AlertCircle size={18} className="shrink-0 text-rose-700" />
-            {error}
+          <div className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50/90 p-4 text-xs font-medium text-rose-800 shadow-2xs">
+            <AlertCircle size={18} className="mt-0.5 shrink-0 text-rose-700" />
+            <span className="break-words">{error}</span>
           </div>
         )}
 
-        {/* Content States */}
+        {/* Loading */}
         {loading ? (
-          <div className="rounded-3xl border border-stone-200/80 bg-white py-16 text-center text-xs text-stone-500 shadow-xs">
-            <RefreshCw size={24} className="mx-auto mb-2 animate-spin text-amber-800" />
+          <div className="rounded-2xl border border-stone-200/80 bg-white py-16 text-center text-xs text-stone-500 shadow-xs sm:rounded-3xl">
+            <RefreshCw
+              size={24}
+              className="mx-auto mb-2 animate-spin text-amber-800"
+            />
             Loading orders from database...
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-stone-300 bg-white/70 py-16 text-center shadow-xs">
-            <Package size={36} className="mx-auto mb-3 text-stone-400" strokeWidth={1.3} />
+          <div className="rounded-2xl border border-dashed border-stone-300 bg-white/70 px-4 py-14 text-center shadow-xs sm:rounded-3xl sm:py-16">
+            <Package
+              size={36}
+              className="mx-auto mb-3 text-stone-400"
+              strokeWidth={1.3}
+            />
+
             <h3 className="font-serif text-lg font-bold text-stone-900">
               No Orders Found
             </h3>
+
             <p className="mt-1 text-xs text-stone-500">
               No orders matched your current search criteria.
             </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-950px border-collapse text-left text-sm">
-                <thead>
-                  <tr className="border-b border-stone-200/80 bg-amber-100/30 text-[11px] font-semibold uppercase tracking-wider text-amber-900">
-                    <th className="px-5 py-4">Order ID</th>
-                    <th className="px-5 py-4">Customer</th>
-                    <th className="px-5 py-4">Items</th>
-                    <th className="px-5 py-4">Total Amount</th>
-                    <th className="px-5 py-4">Payment</th>
-                    <th className="px-5 py-4">Status</th>
-                    <th className="px-5 py-4">Date</th>
-                    <th className="px-5 py-4 text-right">Action</th>
-                  </tr>
-                </thead>
+          <>
+            {/* Mobile Order Cards */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+              {filteredOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="min-w-0 overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-4 shadow-xs"
+                >
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between gap-3 border-b border-stone-100 pb-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                        Order ID
+                      </p>
 
-                <tbody className="divide-y divide-stone-100 text-xs sm:text-sm">
-                  {filteredOrders.map((order) => (
-                    <tr
-                      key={order.id}
-                      className="transition-colors hover:bg-amber-50/20"
-                    >
-                      <td className="whitespace-nowrap px-5 py-4 font-semibold text-stone-900">
+                      <h3 className="mt-1 font-serif text-lg font-bold text-stone-900">
                         #{order.id}
-                      </td>
+                      </h3>
 
-                      <td className="whitespace-nowrap px-5 py-4 text-stone-600">
+                      <p className="mt-1 text-[11px] text-stone-500">
                         Client #{order.user_id}
-                      </td>
+                      </p>
+                    </div>
 
-                      <td className="whitespace-nowrap px-5 py-4 text-stone-600">
-                        {order.total_products} {Number(order.total_products) === 1 ? "piece" : "pieces"}
-                      </td>
+                    <span className="shrink-0 rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-[10px] font-semibold text-stone-700">
+                      {order.status}
+                    </span>
+                  </div>
 
-                      <td className="whitespace-nowrap px-5 py-4 font-bold text-amber-900">
-                        ₹{Number(order.total_amount).toLocaleString("en-IN")}
-                      </td>
+                  {/* Card Information */}
+                  <div className="grid grid-cols-2 gap-4 py-4">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                        Items
+                      </p>
 
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <div className="font-medium text-stone-800">{order.payment_method}</div>
-                        <span className="text-[11px] uppercase tracking-wider text-stone-400">
-                          {order.payment_status}
-                        </span>
-                      </td>
+                      <p className="mt-1 text-sm font-semibold text-stone-800">
+                        {order.total_products}{" "}
+                        {Number(order.total_products) === 1 ? "piece" : "pieces"}
+                      </p>
+                    </div>
 
-                      <td className="whitespace-nowrap px-5 py-4">
-                        <select
-                          value={order.status}
-                          disabled={updatingId === order.id}
-                          onChange={(e) =>
-                            handleStatusChange(order.id, e.target.value)
-                          }
-                          className={`rounded-xl px-3 py-1.5 text-xs font-semibold uppercase tracking-wider outline-none shadow-2xs transition disabled:opacity-50 ${getStatusColor(
-                            order.status
-                          )}`}
-                        >
-                          {statuses.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                        Total Amount
+                      </p>
 
-                      <td className="whitespace-nowrap px-5 py-4 text-stone-500">
-                        {new Date(order.created_at).toLocaleDateString("en-IN", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </td>
+                      <p className="mt-1 break-words font-serif text-base font-bold text-amber-900">
+                        ₹{formatPrice(order.total_amount)}
+                      </p>
+                    </div>
 
-                      <td className="whitespace-nowrap px-5 py-4 text-right">
-                        <Link
-                          to={`/admin/orders/${order.id}`}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200/80 bg-white px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-700 shadow-2xs transition hover:border-amber-700/40 hover:text-amber-800 active:scale-95"
-                        >
-                          <Eye size={13} />
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                        Payment Method
+                      </p>
+
+                      <p className="mt-1 break-words text-xs font-medium text-stone-800">
+                        {order.payment_method}
+                      </p>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                        Payment Status
+                      </p>
+
+                      <p className="mt-1 break-words text-xs font-medium text-stone-800">
+                        {order.payment_status}
+                      </p>
+                    </div>
+
+                    <div className="col-span-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                        Order Date
+                      </p>
+
+                      <p className="mt-1 text-xs text-stone-600">
+                        {formatDate(order.created_at)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Status Update */}
+                  <div className="border-t border-stone-100 pt-3">
+                    <label
+                      htmlFor={`mobile-status-${order.id}`}
+                      className="mb-2 block text-[10px] font-semibold uppercase tracking-wider text-stone-400"
+                    >
+                      Update Order Status
+                    </label>
+
+                    <select
+                      id={`mobile-status-${order.id}`}
+                      value={order.status}
+                      disabled={updatingId === order.id}
+                      onChange={(e) =>
+                        handleStatusChange(order.id, e.target.value)
+                      }
+                      className={`w-full rounded-xl px-3 py-3 text-xs font-semibold outline-none transition disabled:opacity-50 ${getStatusColor(
+                        order.status
+                      )}`}
+                    >
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* View Button */}
+                  <Link
+                    to={`/admin/orders/${order.id}`}
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-stone-200 bg-[#FDFBF7] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-stone-700 transition hover:border-amber-700/40 hover:text-amber-800 active:scale-[0.98]"
+                  >
+                    <Eye size={14} />
+                    View Order Details
+                  </Link>
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* Desktop / Tablet Table */}
+            <div className="hidden overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-xs md:block">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[950px] border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-stone-200/80 bg-amber-100/30 text-[11px] font-semibold uppercase tracking-wider text-amber-900">
+                      <th className="px-5 py-4">Order ID</th>
+                      <th className="px-5 py-4">Customer</th>
+                      <th className="px-5 py-4">Items</th>
+                      <th className="px-5 py-4">Total Amount</th>
+                      <th className="px-5 py-4">Payment</th>
+                      <th className="px-5 py-4">Status</th>
+                      <th className="px-5 py-4">Date</th>
+                      <th className="px-5 py-4 text-right">Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-stone-100 text-xs sm:text-sm">
+                    {filteredOrders.map((order) => (
+                      <tr
+                        key={order.id}
+                        className="transition-colors hover:bg-amber-50/20"
+                      >
+                        <td className="whitespace-nowrap px-5 py-4 font-semibold text-stone-900">
+                          #{order.id}
+                        </td>
+
+                        <td className="whitespace-nowrap px-5 py-4 text-stone-600">
+                          Client #{order.user_id}
+                        </td>
+
+                        <td className="whitespace-nowrap px-5 py-4 text-stone-600">
+                          {order.total_products}{" "}
+                          {Number(order.total_products) === 1 ? "piece" : "pieces"}
+                        </td>
+
+                        <td className="whitespace-nowrap px-5 py-4 font-bold text-amber-900">
+                          ₹{formatPrice(order.total_amount)}
+                        </td>
+
+                        <td className="whitespace-nowrap px-5 py-4">
+                          <div className="font-medium text-stone-800">
+                            {order.payment_method}
+                          </div>
+
+                          <span className="text-[11px] uppercase tracking-wider text-stone-400">
+                            {order.payment_status}
+                          </span>
+                        </td>
+
+                        <td className="whitespace-nowrap px-5 py-4">
+                          <select
+                            value={order.status}
+                            disabled={updatingId === order.id}
+                            onChange={(e) =>
+                              handleStatusChange(order.id, e.target.value)
+                            }
+                            className={`max-w-[180px] rounded-xl px-3 py-2 text-xs font-semibold tracking-wide outline-none shadow-2xs transition disabled:opacity-50 ${getStatusColor(
+                              order.status
+                            )}`}
+                          >
+                            {statuses.map((status) => (
+                              <option key={status} value={status}>
+                                {status}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+
+                        <td className="whitespace-nowrap px-5 py-4 text-stone-500">
+                          {formatDate(order.created_at)}
+                        </td>
+
+                        <td className="whitespace-nowrap px-5 py-4 text-right">
+                          <Link
+                            to={`/admin/orders/${order.id}`}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200/80 bg-white px-3.5 py-2 text-xs font-semibold uppercase tracking-wider text-stone-700 shadow-2xs transition hover:border-amber-700/40 hover:text-amber-800 active:scale-95"
+                          >
+                            <Eye size={13} />
+                            View
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
