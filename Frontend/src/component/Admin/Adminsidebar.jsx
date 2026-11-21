@@ -53,12 +53,12 @@ const AdminSidebar = () => {
         <div className="px-5 py-6 border-b border-[#3D2C22] flex items-center justify-between bg-[#211712] overflow-hidden">
           <div className="flex items-center gap-3 min-w-max">
             <div className="w-10 h-10 rounded-xl bg-amber-700 flex items-center justify-center text-white font-serif font-bold text-xl shadow-md border border-amber-500/30 shrink-0">
-              C
+              G
             </div>
             {!isCollapsed && (
               <div className="transition-opacity duration-200">
                 <h2 className="text-base font-serif font-bold text-amber-400 tracking-wider leading-tight">
-                  CraftAdmin
+                  GaurangtAdmin
                 </h2>
                 <p className="text-[10px] uppercase tracking-widest text-amber-200/60 font-medium mt-0.5">
                   Furniture Studio

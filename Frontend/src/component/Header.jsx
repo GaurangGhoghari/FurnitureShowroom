@@ -139,12 +139,12 @@ const Header = () => {
             className="flex items-center gap-3 shrink-0"
           >
             <div className="w-11 h-11 rounded-xl bg-linear-to-br from-amber-700 to-amber-950 text-white flex items-center justify-center font-serif text-2xl font-bold shadow-md">
-              C
+              G
             </div>
 
             <div>
               <h1 className="text-lg sm:text-xl font-serif font-bold text-stone-900 tracking-wide">
-                CraftStudio
+                GaurangStudio
               </h1>
 
               <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-amber-800 font-semibold">

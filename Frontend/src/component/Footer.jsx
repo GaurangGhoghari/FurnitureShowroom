@@ -16,7 +16,7 @@ const Footer = () => {
               </div>
               <div>
                 <span className="text-xl font-serif font-bold text-amber-500 tracking-wide block leading-none">
-                  CraftStudio
+                  GaurangStudio
                 </span>
                 <span className="text-[10px] uppercase tracking-widest text-stone-400 font-semibold mt-1 block">
                   Furniture Showroom
@@ -105,7 +105,7 @@ const Footer = () => {
                   href="mailto:info@craftstudio.com"
                   className="hover:text-amber-400 transition-colors"
                 >
-                  info@craftstudio.com
+                  gaurangstudio04@gmail.com
                 </a>
               </li>
 

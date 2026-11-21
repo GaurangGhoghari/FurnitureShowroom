@@ -705,7 +705,7 @@ const AdminProducts = () => {
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <span className="h-2 w-2 shrink-0 rounded-full bg-amber-800" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-amber-800 sm:text-xs sm:tracking-[0.2em]">
-                CraftStudio Showroom / Admin
+                Gaurang Studio Showroom / Admin
               </span>
             </div>
 

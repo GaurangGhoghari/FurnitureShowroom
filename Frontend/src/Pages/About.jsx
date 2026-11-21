@@ -176,7 +176,7 @@ const About = () => {
             </p>
 
             <h2 className="text-3xl font-serif font-bold text-stone-900 md:text-4xl tracking-wide">
-              Welcome to CraftStudio
+              Welcome to GaurangStudio
             </h2>
           </div>
 
@@ -226,7 +226,7 @@ const About = () => {
             </p>
 
             <h2 className="mb-4 text-3xl font-serif font-bold text-stone-900 md:text-4xl">
-              Why Choose CraftStudio?
+              Why Choose GaurangStudio?
             </h2>
 
             <p className="mx-auto mb-12 max-w-2xl text-sm sm:text-base text-stone-600 leading-relaxed">

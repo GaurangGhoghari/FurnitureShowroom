@@ -118,7 +118,7 @@ const AdminOrders = () => {
             <div className="mb-2 flex items-center gap-2">
               <span className="h-2 w-2 shrink-0 rounded-full bg-amber-800" />
               <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-amber-800 sm:text-[11px] sm:tracking-[0.2em]">
-                CraftStudio Showroom / Console
+                Gaurang Studio Showroom / Console
               </span>
             </div>
 
