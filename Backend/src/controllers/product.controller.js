@@ -649,39 +649,84 @@ const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Validate product ID
+    if (!id || !Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    // Find product
     const [products] = await db.promise().query(
-      "SELECT image, images FROM products WHERE id = ?",
+      "SELECT id, image, images FROM products WHERE id = ?",
       [id]
     );
 
     if (products.length === 0) {
       return res.status(404).json({
+        success: false,
         message: "Product not found",
       });
     }
 
     const product = products[0];
 
-    await db.promise().query(
-      "DELETE FROM products WHERE id = ?",
-      [id]
-    );
+    try {
+      // Try permanent deletion
+      await db.promise().query(
+        "DELETE FROM products WHERE id = ?",
+        [id]
+      );
 
-    await removeImageFile(product.image);
+      // Delete images only after successful DB deletion
+      await removeImageFile(product.image);
 
-    const additionalImages = parseImages(product.images);
+      const additionalImages = parseImages(product.images);
 
-    for (const imageUrl of additionalImages) {
-      await removeImageFile(imageUrl);
+      for (const imageUrl of additionalImages) {
+        await removeImageFile(imageUrl);
+      }
+
+      return res.status(200).json({
+        success: true,
+        deleted: true,
+        message: "Product deleted successfully",
+      });
+
+    } catch (deleteError) {
+      // If product is referenced by another table,
+      // deactivate it instead of deleting related records.
+      if (
+        deleteError.code === "ER_ROW_IS_REFERENCED_2" ||
+        deleteError.errno === 1451
+      ) {
+        await db.promise().query(
+          "UPDATE products SET active = 0 WHERE id = ?",
+          [id]
+        );
+
+        console.log(
+          `Product ${id} deactivated because related records exist.`
+        );
+
+        return res.status(200).json({
+          success: true,
+          deleted: false,
+          active: 0,
+          message:
+            "Product has related records, so it was deactivated instead of permanently deleted.",
+        });
+      }
+
+      throw deleteError;
     }
 
-    return res.status(200).json({
-      message: "Product deleted successfully",
-    });
   } catch (error) {
     console.error("Delete Product Error:", error);
 
     return res.status(500).json({
+      success: false,
       message: "Failed to delete product",
     });
   }
