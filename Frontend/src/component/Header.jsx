@@ -144,7 +144,7 @@ const Header = () => {
 
             <div>
               <h1 className="text-lg sm:text-xl font-serif font-bold text-stone-900 tracking-wide">
-                GaurangStudio
+                Gaurang Studio
               </h1>
 
               <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-amber-800 font-semibold">

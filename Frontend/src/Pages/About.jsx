@@ -176,7 +176,7 @@ const About = () => {
             </p>
 
             <h2 className="text-3xl font-serif font-bold text-stone-900 md:text-4xl tracking-wide">
-              Welcome to GaurangStudio
+              Welcome to Gaurang Studio
             </h2>
           </div>
 
@@ -200,7 +200,7 @@ const About = () => {
               </h3>
 
               <p className="mt-1 text-xs text-stone-500 leading-relaxed font-medium">
-                Artisanal craftsmanship built for generations.
+                Artisanal Gaurang manship built for generations.
               </p>
             </div>
 
@@ -226,7 +226,7 @@ const About = () => {
             </p>
 
             <h2 className="mb-4 text-3xl font-serif font-bold text-stone-900 md:text-4xl">
-              Why Choose GaurangStudio?
+              Why Choose Gaurang Studio?
             </h2>
 
             <p className="mx-auto mb-12 max-w-2xl text-sm sm:text-base text-stone-600 leading-relaxed">

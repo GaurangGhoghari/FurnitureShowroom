@@ -16,9 +16,9 @@ const Footer = () => {
               </div>
               <div>
                 <span className="text-xl font-serif font-bold text-amber-500 tracking-wide block leading-none">
-                  GaurangStudio
+                  Gaurang Studio
                 </span>
-                <span className="text-[10px] uppercase tracking-widest text-stone-400 font-semibold mt-1 block">
+                <span className="text-[10px] uppercase tracking-widest text-stone-300 font-semibold mt-1 block">
                   Furniture Showroom
                 </span>
               </div>
@@ -132,7 +132,7 @@ const Footer = () => {
       {/* Footer Bottom Bar */}
       <div className="border-t border-stone-800/80 bg-stone-950/40">
         <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500">
-          <p>© 2026 CraftStudio Furniture Showroom. All rights reserved.</p>
+          <p>© 2026 Gaurang Studio Furniture Showroom. All rights reserved.</p>
           <div className="flex gap-4">
             <span className="hover:text-stone-400 transition cursor-pointer">
               Privacy Policy

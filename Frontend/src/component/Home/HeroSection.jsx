@@ -27,7 +27,7 @@ const HeroSection = () => {
           <div className="hero-badge mb-4 inline-flex items-center gap-2 rounded-full border border-amber-200/60 bg-amber-100/70 px-3 py-2 sm:mb-6 sm:px-4">
             <span className="h-2 w-2 animate-pulse rounded-full bg-amber-600"></span>
             <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-900 sm:text-sm sm:tracking-[0.18em]">
-              Crafted for Your Lifestyle
+              Gaurang for Your Lifestyle
             </span>
           </div>
 

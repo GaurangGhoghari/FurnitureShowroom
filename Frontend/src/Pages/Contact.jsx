@@ -14,13 +14,13 @@ import {
 } from "lucide-react";
 
 const contactInfo = [
-  {
-    icon: MapPin,
-    title: "Visit Our Showroom",
-    detail: "Katargam, Surat, Gujarat",
-    link: "https://www.google.com/maps/search/?api=1&query=Furniture+Showroom+Katargam+Surat",
-    linkText: "Get Directions",
-  },
+  // {
+  //   icon: MapPin,
+  //   title: "Visit Our Showroom",
+  //   detail: "Katargam, Surat, Gujarat",
+  //   link: "https://www.google.com/maps/search/?api=1&query=Furniture+Showroom+Katargam+Surat",
+  //   linkText: "Get Directions",
+  // },
   {
     icon: Phone,
     title: "Call Our Team",
@@ -385,15 +385,7 @@ ${formData.message.trim()}
               <ArrowUpRight size={17} />
             </a>
 
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Furniture+Showroom+Katargam+Surat"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl border border-stone-200/80 bg-white px-7 py-3.5 text-sm font-semibold text-stone-800 shadow-xs transition-all duration-200 hover:border-amber-700/40 hover:text-amber-800"
-            >
-              <MapPin size={17} className="text-amber-800" />
-              Find Our Showroom
-            </a>
+            
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs font-medium uppercase tracking-wider text-stone-600">
@@ -776,53 +768,7 @@ ${formData.message.trim()}
         </div>
       </section>
 
-      {/* Showroom Map */}
-      <section className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-        <div className="contact-reveal grid items-center gap-8 rounded-3xl border border-stone-200/80 bg-white p-8 shadow-xs md:p-12 lg:grid-cols-2">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-800">
-              Find Us
-            </p>
-
-            <h2 className="font-serif text-3xl font-bold tracking-wide text-stone-900 md:text-4xl">
-              Visit Our Showroom
-            </h2>
-
-            <p className="mt-3 text-sm leading-relaxed text-stone-600 sm:text-base">
-              Experience the wood texture, finishes, and comfort in person.
-              Meet our team at Katargam, Surat.
-            </p>
-
-            <div className="mt-6 flex items-start gap-3">
-              <MapPin size={20} className="mt-1 shrink-0 text-amber-800" />
-              <p className="text-sm font-medium text-stone-700">
-                Katargam, Surat, Gujarat, India
-              </p>
-            </div>
-
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=Furniture+Showroom+Katargam+Surat"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-amber-800 px-7 py-3 text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition hover:bg-amber-900"
-            >
-              Get Directions
-              <ArrowUpRight size={15} />
-            </a>
-          </div>
-
-          <div className="contact-map overflow-hidden rounded-2xl border border-stone-200/80 bg-amber-50/50 shadow-xs">
-            <iframe
-              title="Furniture showroom location in Katargam, Surat"
-              src="https://maps.google.com/maps?q=Katargam%2C%20Surat%2C%20Gujarat&t=&z=13&ie=UTF8&iwloc=&output=embed"
-              className="h-300px w-full border-0 sm:h-360px"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
-        </div>
-      </section>
-
+    
       {/* Bottom CTA */}
       <section className="contact-reveal border-t border-stone-200/80 bg-amber-100/40 px-6 py-16 text-center md:py-20">
         <div className="mx-auto max-w-4xl space-y-4">
