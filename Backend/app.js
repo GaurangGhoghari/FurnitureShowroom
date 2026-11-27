@@ -4,6 +4,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const { rateLimit } = require("express-rate-limit");
 const path = require("path");
 
 // Import Routes
@@ -26,6 +28,36 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   process.env.CLIENT_URL,
 ].filter(Boolean);
+
+// Basic HTTP Security
+app.disable("x-powered-by");
+app.use(helmet());
+
+// General API Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests. Please try again later.",
+  },
+});
+
+app.use("/api", apiLimiter);
+
+// Authentication Rate Limiting
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many authentication attempts. Please try again later.",
+  },
+});
 
 // CORS Configuration
 app.use(
@@ -50,16 +82,51 @@ app.use(
   })
 );
 
-// Middleware
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+// Request Body Limits
+app.use(express.json({ limit: "1mb" }));
+
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "1mb",
+    parameterLimit: 100,
+  })
+);
+
 app.use(cookieParser());
 
 // Legacy Local Uploads
-app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "src", "uploads"))
+);
+
+// Direct Browser Navigation Redirect for Product APIs
+app.use("/api/products", (req, res, next) => {
+  const acceptHeader = req.get("accept") || "";
+
+  const isBrowserNavigation =
+    req.method === "GET" &&
+    (
+      (
+        req.get("sec-fetch-mode") === "navigate" &&
+        req.get("sec-fetch-dest") === "document"
+      ) ||
+      acceptHeader.includes("text/html")
+    );
+
+  if (isBrowserNavigation) {
+    return res.redirect(
+      302,
+      "https://furniture-showroom-bice.vercel.app/product"
+    );
+  }
+
+  next();
+});
 
 // API Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -76,12 +143,33 @@ app.get("/", (req, res) => {
   });
 });
 
-// Error Handler
+// Global Error Handler
 app.use((err, req, res, next) => {
+  if (
+    err.message &&
+    err.message.startsWith("Not allowed by CORS")
+  ) {
+    return res.status(403).json({
+      success: false,
+      message: "Origin not allowed",
+    });
+  }
+
   console.error("Backend Error:", err.message);
 
-  res.status(500).json({
-    message: err.message || "Internal Server Error",
+  const status =
+    Number.isInteger(err.status) &&
+    err.status >= 400 &&
+    err.status < 500
+      ? err.status
+      : 500;
+
+  return res.status(status).json({
+    success: false,
+    message:
+      status === 500
+        ? "Internal Server Error"
+        : err.message,
   });
 });
 
